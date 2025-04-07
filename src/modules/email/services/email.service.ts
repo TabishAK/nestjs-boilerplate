@@ -19,8 +19,7 @@ export class EmailService {
   }
 
   async loadTemplate(templateName: string, context: Record<string, any>) {
-    const templatePath = this.configService.get<string>(CONFIG.TEMPLATES_PATH);
-    const filePath = path.resolve(`src/${templatePath}/${templateName}.hbs`);
+    const filePath = path.resolve(`src/email-templates/${templateName}.hbs`);
     const templateSource = fs.readFileSync(filePath, 'utf-8');
     const template = Handlebars.compile(templateSource);
     return template(context);

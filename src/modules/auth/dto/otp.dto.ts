@@ -12,10 +12,3 @@ export class OtpDto {
   @IsNotEmpty()
   otp: string;
 }
-
-export class GenerateOtpDto {
-  @ApiProperty()
-  @IsEmail()
-  @IsNotEmpty()
-  email: string;
-}

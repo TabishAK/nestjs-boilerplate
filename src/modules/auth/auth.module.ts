@@ -3,13 +3,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EmailModule } from 'src/modules/email/email.module';
-import { User, UserSchema } from 'src/modules/auth/user.schema';
 import { Otp, OtpSchema } from 'src/modules/auth/otp.schema';
 import { CONFIG } from 'src/constants/config';
 import { AuthController } from 'src/modules/auth/auth.controller';
 import { AuthService } from 'src/modules/auth/auth.service';
 import { OtpService } from 'src/modules/auth/otp.service';
-import { SocialAuthService } from 'src/modules/auth/social-auth.service';
+import { User, UserSchema } from '../user/user.schema';
+import { UserService } from '../user/user.service';
+import { JwtStrategy } from 'src/strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { SocialAuthService } from 'src/modules/auth/social-auth.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, OtpService, SocialAuthService],
-  exports: [AuthService],
+  providers: [AuthService, OtpService, UserService, JwtStrategy],
+  exports: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

@@ -5,13 +5,15 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { OAuth2Client } from 'google-auth-library';
 import { Injectable, HttpStatus } from '@nestjs/common';
-
-import { SerializeHttpResponse } from 'src/utils/serializer';
+import { User, UserDocument } from '../user/user.schema';
 import { CONFIG, DEFAULT_TOKEN_VALIDITY } from 'src/constants/config';
-import { User, UserDocument } from './user.schema';
 import { generateRandomString } from 'src/utils/auth.util';
-import { AUTH_SUCCESS } from 'src/constants/api-response/auth.response';
-import { AUTH_PROVIDER } from 'src/types/users.type';
+import { AUTH_PROVIDER } from 'src/constants/auth';
+import { SerializeHttpResponse } from 'src/utils/serializer';
+import {
+  AUTH_ERRORS,
+  AUTH_SUCCESS,
+} from 'src/constants/api-response/auth.response';
 
 @Injectable()
 export class SocialAuthService {
@@ -28,7 +30,7 @@ export class SocialAuthService {
     );
   }
 
-  private async generateToken(
+  private generateToken(
     userId: Types.ObjectId,
     email: string,
     expiresIn: string
@@ -57,41 +59,54 @@ export class SocialAuthService {
     return newUser;
   }
 
-  private async loginUser(user: UserDocument) {
-    const token = await this.generateToken(
+  private loginUser(user: UserDocument) {
+    const token = this.generateToken(
       user._id as Types.ObjectId,
       user.email,
       DEFAULT_TOKEN_VALIDITY
     );
-
-    return { email: user.email, name: user.name, _id: user._id, token };
+    return {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      _id: user._id,
+      token,
+    };
   }
 
   async verifyGoogleToken(idToken: string) {
-    const ticket = await this.googleClient.verifyIdToken({
-      idToken,
-      audience: this.configService.get<string>(CONFIG.GOOGLE_CLIENT_ID),
-    });
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: this.configService.get<string>(CONFIG.GOOGLE_CLIENT_ID),
+      });
 
-    const payload = ticket.getPayload();
-    const user = await this.userModel.findOne({ email: payload?.email });
+      const payload = ticket.getPayload();
+      const user = await this.userModel.findOne({ email: payload?.email });
 
-    if (!user) {
-      const newUser = await this.createNewUser(payload);
-      const loggedData = await this.loginUser(newUser);
+      if (!user) {
+        const newUser = await this.createNewUser(payload);
+        const loggedData = this.loginUser(newUser);
 
+        return SerializeHttpResponse(
+          loggedData,
+          HttpStatus.CREATED,
+          AUTH_SUCCESS.GOOGLE_ACCOUNT_CREATION
+        );
+      } else {
+        const loggedUser = this.loginUser(user);
+
+        return SerializeHttpResponse(
+          loggedUser,
+          HttpStatus.OK,
+          AUTH_SUCCESS.ACCOUNT_LOGIN
+        );
+      }
+    } catch {
       return SerializeHttpResponse(
-        loggedData,
-        HttpStatus.CREATED,
-        AUTH_SUCCESS.GOOGLE_ACCOUNT_CREATION
-      );
-    } else {
-      const loggedUser = await this.loginUser(user);
-
-      return SerializeHttpResponse(
-        loggedUser,
-        HttpStatus.OK,
-        AUTH_SUCCESS.ACCOUNT_LOGIN
+        null,
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        AUTH_ERRORS.ACCOUNT_LOGIN
       );
     }
   }

@@ -1,11 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEmail, IsLowercase, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsLowercase,
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
+import { USER_ROLES } from 'src/constants/user';
 
 export class SignupDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  name: string;
+  firstName: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  lastName: string;
 
   @ApiProperty()
   @IsEmail()
@@ -15,10 +28,15 @@ export class SignupDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  password: string;
+  phone: string;
 
   @ApiProperty()
-  @IsBoolean()
   @IsNotEmpty()
-  isTermsAgree: boolean;
+  @IsEnum(USER_ROLES)
+  role: USER_ROLES;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  password: string;
 }

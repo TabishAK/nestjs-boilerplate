@@ -4,7 +4,6 @@ export enum OTP_SUCCESS {
 }
 
 export enum OTP_ERROR {
-  GENERATE_OTP = 'An error occurred while generating otp.',
-  NOT_VERIFIED_OTP = 'OTP verification failed.',
-  VERIFIED_OTP = 'An error occurred while verifying otp.',
+  OTP_NOT_VERIFIED = 'OTP verification failed.',
+  OTP_EXPIRED = 'This OTP has expired.',
 }

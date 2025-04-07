@@ -30,6 +30,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/mongoose": "^11.0.3",
+    "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/swagger": "^8.1.0",
     "@sendgrid/mail": "^8.1.4",
@@ -40,7 +41,9 @@
     "google-auth-library": "^9.15.1",
     "handlebars": "^4.7.8",
     "mongoose": "^8.13.2",
-    "otpauth": "^9.4.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
